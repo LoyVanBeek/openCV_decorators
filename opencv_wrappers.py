@@ -13,6 +13,20 @@ def show(**images):
     for name in images.keys():
         cv.DestroyWindow(name)
 
+def show_stream(name, wait=10):
+    cv.NamedWindow(name)
+
+    while True:
+        image = yield
+
+        if image: #TODO: check for StopIteration
+            cv.ShowImage(name, image)
+            cv.WaitKey(wait)
+        else:
+            cv.WaitKey(0)
+            cv.DestroyWindow(name)
+            yield StopIteration
+
 @decorators.make_filter
 def gauss(im, size=(11,11), method=cv.CV_GAUSSIAN, out=None):
     assert (size[0] % 2 == 1) and (size[1] % 2 == 1)
@@ -83,9 +97,18 @@ def test3(image):
     canny = decorators.apply_to_channels(image, (gauss(), doCanny_single(0,255,3)))
     show(cannied=canny)
 
+def test_show_stream(image, name="Stream"):
+    ss = show_stream(name)
+    ss.next()
+    ss.send(image)
+    import time
+    time.sleep(2)
+    ss.send(None)
+
 if __name__ == "__main__":
     image = cv.LoadImage("""images\geilo_25.png""")
 
 ##    test1(image)
 ##    test2(image)
-    test3(image)
+##    test3(image)
+    test_show_stream(image)
