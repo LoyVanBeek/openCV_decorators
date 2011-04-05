@@ -51,16 +51,16 @@ def scale(im, scale=2, imfilter=cv.CV_GAUSSIAN_5x5, out=None):
     return out
 
 @decorators.make_filter
-def doCanny(im, low, high, aperture, out=None):
+def doCanny_3(im, low, high, aperture, out=None):
     in1 = cv.CreateImage(cv.GetSize(im), cv.IPL_DEPTH_8U, 1)
     in2 = cv.CreateImage(cv.GetSize(im), cv.IPL_DEPTH_8U, 1)
     in3 = cv.CreateImage(cv.GetSize(im), cv.IPL_DEPTH_8U, 1)
 
     cv.Split(im, in1, in2, in3, None)
 
-    out1 = doCanny_single(in1, low, high, aperture)
-    out2 = doCanny_single(in2, low, high, aperture)
-    out3 = doCanny_single(in3, low, high, aperture)
+    out1 = canny(in1, low, high, aperture)
+    out2 = canny(in2, low, high, aperture)
+    out3 = canny(in3, low, high, aperture)
 
     if not out: out = cv.CreateImage(cv.GetSize(im), cv.IPL_DEPTH_8U, 3)
     cv.Merge(out1, out2, out3, None, out)
@@ -68,7 +68,7 @@ def doCanny(im, low, high, aperture, out=None):
     return out
 
 @decorators.make_filter
-def doCanny_single(im, low, high, aperture):
+def canny(im, low, high, aperture):
     assert im.channels == 1
 
     out = cv.CreateImage(cv.GetSize(im), cv.IPL_DEPTH_8U, 1)
@@ -78,24 +78,21 @@ def doCanny_single(im, low, high, aperture):
 
 ############# TESTS #############
 def test1(image):
-    pipe = decorators.chain(gauss(), scale())
-    pipe.next()
-    out = pipe.send(image)
-    #gaussed = decorators.chain(image, gauss())
-    show(gaussed=out, orig=image)
+    gaussed = decorators.chain(image, gauss())
+    show(gaussed=gaussed, orig=image)
 
 def test2(image):
     pipe2 = decorators.pipe(gauss(), scale())
-    print "pipe2 created"
+    #print "pipe2 created"
     pipe2.next()
-    print "Initialized"
+    #print "Initialized"
     out2 = pipe2.send(image)
-    print "Called, showing output:"
+    #print "Called, showing output:"
     show(out2=out2)
 
 def test3(image):
-    canny = decorators.apply_to_channels(image, (gauss(), doCanny_single(0,255,3)))
-    show(cannied=canny)
+    cannied = decorators.apply_to_channels(image, (gauss(), scale(), canny(0,255,3)))
+    show(cannied=cannied)
 
 def test_show_stream(image, name="Stream"):
     ss = show_stream(name)
@@ -108,7 +105,7 @@ def test_show_stream(image, name="Stream"):
 if __name__ == "__main__":
     image = cv.LoadImage("""images\geilo_25.png""")
 
-##    test1(image)
-##    test2(image)
-##    test3(image)
+    test1(image)
+    test2(image)
+    test3(image)
     test_show_stream(image)

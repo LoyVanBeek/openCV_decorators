@@ -39,7 +39,7 @@ def pipe(*parts):
             part.next()
         temp = yield
         for part in parts:
-            print "Next step: %s"%str(part), temp
+            #print "Next step: %s"%str(part), temp
             temp = part.send(temp)
         yield temp
 
