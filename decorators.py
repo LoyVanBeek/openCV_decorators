@@ -1,13 +1,14 @@
 """Library of convienence wrappers for OpenCV-functions and operators."""
 import cv
 
+#TODO: have configurable resources. Some ops need several images and/or memStorages. 
 def make_resources(op):
     """Preallocate resources image operators need"""
     def allocator(image, *args, **kwargs):
         sameSize = True #TODO: make configable
         depth = image.depth
         channels = image.channels
-        out = cv.CreateImage(cv.GetSize(image), depth, channels)
+        out = cv.CreateImage(cv.GetSize(image), depth, channels) #TODO: if kwargs already has an image as value for the key "out", use tis image
         op(image, out, *args, **kwargs)
         return out
     return allocator
@@ -99,8 +100,8 @@ def apply_to_channels(image, ops, merge_result=False, out=None, debug=False):
     return result
 
 def test1(image):
-    agauss = make_resources(cv.Smooth)
-    return agauss(image, cv.CV_GAUSSIAN, 11,11)
+    smooth = make_resources(cv.Smooth)
+    return smooth(image, cv.CV_GAUSSIAN, 11,11)
     
 
 if __name__ == "__main__":

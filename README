@@ -1,5 +1,5 @@
 Wrapper for the python-port of the openCV-library. 
-The OpenCV python bindings is much alike the C and C++ interface. 
 
+The OpenCV python bindings are much alike the C and C++ interface. 
 These wrappers allow for faster prototyping of applications, because it will take care of the instantiation of resources OpenCV's functions need. 
 It also allows to chain functions into a pipeline for processing images. 
